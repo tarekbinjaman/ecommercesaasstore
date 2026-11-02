@@ -3,7 +3,6 @@ import React from 'react';
 import { Header } from '../components/Header/Header';
 import SubHeader from '../components/Header/SubHeader';
 import Footer from '../components/Footer/Footer';
-import MobileBottomNav from '../components/MobileBotoom/MobileBottomNav';
 import { usePathname } from 'next/navigation';
 import { shouldHideSubHeader } from '@/lib/shouldHideSubHeader';
 import { useHideOnScroll } from '@/lib/hooks/useScrollDirection';
@@ -35,7 +34,10 @@ export default function Layout({ children }: LayoutProps) {
 
       <main className={` ${pathname === '/' && 'mt-42'} ${pathname.startsWith('/products') && 'lg:mt-20 mt-30'}
       ${pathname.startsWith('/categories') && 'lg:mt-40 mt-40'}
-      ${pathname.startsWith('/productDetail') && 'lg:mt-30 mt-30'} `}>{children}
+      ${pathname.startsWith('/productDetail') && 'lg:mt-30 mt-30'}
+      ${pathname.startsWith('/flash-sale') && 'lg:mt-20 mt-30'}
+      ${pathname.startsWith('/best-products') && 'lg:mt-20 mt-30'}
+      ${(pathname.startsWith('/cart') || pathname.startsWith('/checkout')) && 'lg:mt-20 mt-30'} `}>{children}
 
                 {/* <MobileBottomNav /> */}
       </main>

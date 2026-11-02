@@ -2,7 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import FlashSaleCountdown, {
+  useFlashSaleCountdown,
+} from '../components/FlashSaleCountdown/FlashSaleCountdown';
 
 const products = [
   {
@@ -52,48 +54,8 @@ const products = [
 ];
 
 function Countdown() {
-  // Demo duration: 50 days, 6 hours, 40 minutes, 30 seconds.
-  const [remaining, setRemaining] = useState(50 * 86400 + 6 * 3600 + 40 * 60 + 30);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setRemaining((current) => Math.max(0, current - 1));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const days = Math.floor(remaining / 86400);
-  const hours = Math.floor((remaining % 86400) / 3600);
-  const minutes = Math.floor((remaining % 3600) / 60);
-  const seconds = remaining % 60;
-
-  const items = [
-    { value: days, label: 'Days' },
-    { value: hours, label: 'Hours' },
-    { value: minutes, label: 'Minutes' },
-    { value: seconds, label: 'Seconds' },
-  ];
-
-  return (
-    <div className="flex flex-wrap justify-center gap-2.5 sm:gap-4">
-      {items.map((item) => (
-        <div
-          key={item.label}
-          className="flex h-[88px] w-[76px] flex-col items-center justify-center
-            rounded-2xl border border-gray-200 bg-white/80
-            shadow-sm sm:h-[100px] sm:w-[95px]"
-        >
-          <span className="text-2xl font-bold leading-tight text-black sm:text-4xl">
-            {String(item.value).padStart(2, '0')}
-          </span>
-          <span className="mt-1 text-xs text-gray-800 sm:text-base">
-            {item.label}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
+  const timeLeft = useFlashSaleCountdown();
+  return <FlashSaleCountdown timeLeft={timeLeft} />;
 }
 
 function FlashProductCard({

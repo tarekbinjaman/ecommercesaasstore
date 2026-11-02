@@ -8,6 +8,8 @@ import CategoryPage from '../pages/CategoryPage'
 import CartPage from '../pages/CartPage'
 import CheckoutPage from '../pages/CheckoutPage'
 import Login from '../pages/Login'
+import FlashSale from '../pages/FlashSale'
+import BestProducts from '../pages/BestProducts'
 
 const design: DesignPackage = {
   Layout,
@@ -19,6 +21,8 @@ const design: DesignPackage = {
     Cart: CartPage,
     Checkout: CheckoutPage,
     Login: Login,
+    FlashSale,
+    BestProducts,
   },
   routes: {
     '':                  'Home',
@@ -29,6 +33,8 @@ const design: DesignPackage = {
     'cart':              'Cart',
     'checkout':          'Checkout',
     'login':             'Login',
+    'flash-sale':        'FlashSale',
+    'best-products':     'BestProducts',
   },
 }
 

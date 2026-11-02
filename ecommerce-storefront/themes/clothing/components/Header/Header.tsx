@@ -8,6 +8,7 @@ import { ChevronDown } from "lucide-react";
 import MobileSidebar from "../Mobilesidebar/MobileSidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCart } from "../../hooks/useCart";
 
 type NavLink = {
   label: string;
@@ -29,6 +30,9 @@ export function Header() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const pathName = usePathname();
   const isProductsPage = pathName.startsWith('/products')
+  const { count } = useCart();
+  const cartCount = count > 99 ? "99+" : count;
+  const cartLabel = `Cart, ${count} ${count === 1 ? "item" : "items"}`;
 
   return (
     <>
@@ -60,12 +64,12 @@ export function Header() {
             <a href="#" aria-label="Wishlist" className="relative">
               <FaRegHeart className="h-5 w-5 transition hover:text-rose-400" />
             </a>
-            <a href="#" aria-label="Cart" className="relative">
+            <Link href="/cart" aria-label={cartLabel} className="relative">
               <FaShoppingBag className="h-5 w-5 transition hover:text-rose-400" />
-              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white">
-                0
+              <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-0.5 text-[10px] font-bold text-white">
+                {cartCount}
               </span>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -139,16 +143,16 @@ export function Header() {
                 <FaRegHeart className="h-6 w-6" />
               </a>
 
-              <a
-                href="#"
-                aria-label="Cart"
+              <Link
+                href="/cart"
+                aria-label={cartLabel}
                 className="relative text-stone-700 transition hover:text-rose-600"
               >
                 <FaShoppingBag className="h-6 w-6" />
-                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-rose-600 text-[10px] font-bold text-white">
-                  0
+                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-rose-600 px-0.5 text-[10px] font-bold text-white">
+                  {cartCount}
                 </span>
-              </a>
+              </Link>
             </div>
           </div>
 

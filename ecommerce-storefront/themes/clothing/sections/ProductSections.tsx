@@ -280,7 +280,7 @@ export default function ProductSections() {
         title="Best Selling Products"
         subtitle="Customer favorites, chosen again and again."
         products={bestSellers}
-        href="/best-sellers"
+        href="/best-products"
       />
     </>
   );

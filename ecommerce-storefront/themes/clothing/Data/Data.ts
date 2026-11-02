@@ -718,6 +718,9 @@ export const products: Product[] = [
 /*  FLASH SALE PRODUCTS                                                */
 /* ------------------------------------------------------------------ */
 
+/** When the current flash sale ends. Every flash sale countdown reads this. */
+export const FLASH_SALE_ENDS_AT = "2026-12-31T23:59:59";
+
 export const flashSale: Product[] = [
   {
     id: "flash-001",
@@ -860,6 +863,16 @@ export const flashSale: Product[] = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  PROMO CODES                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Promo code → flat discount in taka. Entered on the cart page. */
+export const PROMO_CODES: Record<string, number> = {
+  STYLE100: 100,
+  EID200: 200,
+};
+
+/* ------------------------------------------------------------------ */
 /*  HELPERS                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -943,4 +956,9 @@ export function getFlashSaleProductById(id: string): Product | undefined {
 /** Find a single flash sale product by its slug. */
 export function getFlashSaleProductBySlug(slug: string): Product | undefined {
   return flashSale.find((p) => p.slug === slug);
+}
+
+/** All products flagged as best sellers. */
+export function getBestSellerProducts(): Product[] {
+  return products.filter((p) => p.flag === "best-seller");
 }

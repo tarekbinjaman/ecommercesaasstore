@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FaMinus, FaPlus, FaShoppingBag } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { FaCheck, FaMinus, FaPlus, FaShoppingBag } from "react-icons/fa";
 import { FiChevronRight } from "react-icons/fi";
 import {
   type Product,
@@ -16,6 +17,7 @@ import {
 import ProductCard from "../components/ProductCard/ProductCard";
 import ProductInfoTabs from "../sections/ProductInfoTabs";
 import Image from "next/image";
+import { addToCart } from "../hooks/useCart";
 
 type Props = {
   slug: string;
@@ -28,8 +30,10 @@ function resolveProduct(param: string): Product | undefined {
 export default function ProductDetail({ slug }: Props) {
   const product = resolveProduct(slug);
 
+  const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
 
   if (!product) {
     return (
@@ -70,6 +74,17 @@ export default function ProductDetail({ slug }: Props) {
     : 0;
 
   const currentImage = product.images[activeImage] ?? product.images[0];
+
+  const handleAddToCart = () => {
+    addToCart(product.slug, quantity);
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    addToCart(product.slug, quantity);
+    router.push("/checkout");
+  };
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-6 lg:py-10 ">
@@ -261,14 +276,28 @@ export default function ProductDetail({ slug }: Props) {
 
             <button
               type="button"
+              onClick={handleAddToCart}
               disabled={!inStock}
               className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#111111] px-6 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 cursor-pointer"
             >
-              <FaShoppingBag className="h-4 w-4" />
-              Add to Cart
+              {justAdded ? (
+                <>
+                  <FaCheck className="h-4 w-4" />
+                  Added to Cart
+                </>
+              ) : (
+                <>
+                  <FaShoppingBag className="h-4 w-4" />
+                  Add to Cart
+                </>
+              )}
             </button>
+            <span aria-live="polite" className="sr-only">
+              {justAdded ? `${product.name} added to cart` : ""}
+            </span>
             <button
               type="button"
+              onClick={handleBuyNow}
               disabled={!inStock}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-amber-400/80 px-6 text-md text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-gray-300 cursor-pointer"
             >
