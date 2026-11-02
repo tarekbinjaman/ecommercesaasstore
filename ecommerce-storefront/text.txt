@@ -1,0 +1,314 @@
+npx create-next-app@latest ecommerce-storefront --typescript --tailwind --app
+cd ecommerce-storefront
+
+create new file and missing file:
+tree:
+=====
+ecommerce-storefront/
+│
+├── .nex/
+│
+├── app/                          # (create-next-app থেকে)
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+│
+├── components/
+│   └── Button.tsx                # ← নতুন
+│
+├── lib/
+│   ├── api/
+│   │   ├── products.ts           # ← নতুন
+│   │   └── tenant.ts             # ← নতুন
+│   │
+│   └── hooks/
+│       ├── useAuth.ts            # ← নতুন
+│       └── useCart.ts            # ← নতুন
+│
+├── node_modules/
+│
+├── public/
+│
+├── themes/
+│   ├── grocery/                  # (খালি ফোল্ডার)
+│   │
+│   ├── marketplace/
+│   │   ├── Footer.tsx            # ← নতুন
+│   │   ├── Header.tsx            # ← নতুন
+│   │   ├── Home.tsx              # ← নতুন
+│   │   ├── ProductCard.tsx       # ← নতুন
+│   │   └── index.tsx             # ← নতুন
+│   │
+│   ├── registry.ts               # ← নতুন
+│   └── types.ts                  # ← নতুন
+│
+├── .env.local
+├── .gitignore
+├── AGENTS.md
+├── CLAUDE.md
+├── eslint.config.mjs
+├── middleware.ts                 # ← নতুন (root-এ)
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── README.md
+├── tree.txt
+└── tsconfig.json
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/types.ts:
+export interface TenantConfig {
+  tenantId: string
+  theme: string
+  storeName: string
+  logoUrl: string
+  colors: { headerBg: string; primary: string }
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/Footer.tsx
+export function Footer() {
+  return <footer style={{ padding: 16, textAlign: 'center' }}>© 2026 Marketplace</footer>
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/ProductCard.tsx
+export function ProductCard({ name, price }: { name: string; price: number }) {
+  return (
+    <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8 }}>
+      <p>{name}</p>
+      <p>৳{price}</p>
+    </div>
+  )
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/Home.tsx
+import { TenantConfig } from '@/themes/types'
+import { getProductsByTenant } from '@/lib/api/products'
+import { Header } from './Header'
+import { Footer } from './Footer'
+import { ProductCard } from './ProductCard'
+
+export async function Home({ tenant }: { tenant: TenantConfig }) {
+  const products = await getProductsByTenant(tenant.tenantId)
+
+  return (
+    <div>
+      <Header tenant={tenant} />
+      <main style={{ padding: 16, display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
+        {products.map(p => (
+          <ProductCard key={p.id} name={p.name} price={p.price} />
+        ))}
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// lib/api/tenant.ts:
+import { TenantConfig } from '@/themes/types'
+
+export async function getTenantByHost(host: string): Promise<TenantConfig> {
+  // ekhon hardcoded — pore Django backend theke fetch korbe
+  if (host.startsWith('shop1')) {
+    return { tenantId: '1', theme: 'marketplace', storeName: 'Hikmot IT Shop', logoUrl: '/logo1.png', colors: { headerBg: '#000000', primary: '#D85A30' } }
+  }
+  // unknown host — fallback marketplace-e, silent crash na
+  return { tenantId: '1', theme: 'marketplace', storeName: 'Hikmot IT Shop', logoUrl: '/logo1.png', colors: { headerBg: '#000000', primary: '#D85A30' } }
+}
+
+#? ===== next themes add ======
+
+// import { TenantConfig } from '@/themes/types'
+
+// export async function getTenantByHost(host: string): Promise<TenantConfig> {
+//   // ekhon hardcoded — pore Django backend theke fetch korbe
+//   if (host.startsWith('shop1')) {
+//     return { tenantId: '1', theme: 'marketplace', storeName: 'Hikmot IT Shop', logoUrl: '/logo1.png', colors: { headerBg: '#000000', primary: '#D85A30' } }
+//   }
+//   if (host.startsWith('shop2')) {
+//     return { tenantId: '2', theme: 'grocery', storeName: 'Fresh Mart', logoUrl: '/logo2.png', colors: { headerBg: '#1D9E75', primary: '#0F6E56' } }
+//   }
+//   // unknown host — fallback marketplace-e, silent crash na
+//   return { tenantId: '1', theme: 'marketplace', storeName: 'Hikmot IT Shop', logoUrl: '/logo1.png', colors: { headerBg: '#000000', primary: '#D85A30' } }
+// }
+
+# ================================================================================================
+# ================================================================================================
+
+// lib/hooks/useCart.ts:
+'use client'
+import { useState } from 'react'
+export function useCart() {
+  const [items, setItems] = useState<any[]>([])
+  return { items, addItem: (item: any) => setItems(prev => [...prev, item]) }
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// components/Button.tsx:
+export function Button({ children, ...props }: any) {
+  return <button style={{ padding: '8px 16px', borderRadius: 6 }} {...props}>{children}</button>
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/Header.tsx:
+import { TenantConfig } from '@/themes/types'
+export function Header({ tenant }: { tenant: TenantConfig }) {
+  return (
+    <header style={{ background: tenant.colors.headerBg, color: '#fff', padding: 16 }}>
+      <h1>{tenant.storeName}</h1>
+    </header>
+  )
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/ProductCard.tsx:
+export function ProductCard({ name, price }: { name: string; price: number }) {
+  return (
+    <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 8 }}>
+      <p>{name}</p>
+      <p>৳{price}</p>
+    </div>
+  )
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/marketplace/index.ts:
+export * from './Header'
+export * from './Footer'
+export * from './Home'
+export * from './ProductCard'
+
+# ================================================================================================
+# ================================================================================================
+
+// middleware.ts:
+import { NextRequest, NextResponse } from 'next/server'
+export function middleware(req: NextRequest) {
+  const host = (req.headers.get('host') || '').split(':')[0]
+  const res = NextResponse.next()
+  res.headers.set('x-tenant-host', host)
+  return res
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "My E-commerce Store",
+  description: "Multi-tenant storefront",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// app/page.tsx:
+import { headers } from 'next/headers'
+import { getTenantByHost } from '@/lib/api/tenant'
+import { themeRegistry } from '@/themes/registry'
+import type { Metadata } from 'next'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers()
+  const host = headersList.get('x-tenant-host') || 'shop1.localhost'
+  const tenant = await getTenantByHost(host)
+
+  return {
+    title: tenant.storeName,
+    description: `Shop at ${tenant.storeName}`,
+  }
+}
+
+export default async function HomePage() {
+  const headersList = await headers()
+  const host = headersList.get('x-tenant-host') || 'shop1.localhost'
+  const tenant = await getTenantByHost(host)
+  const ThemeModule = await themeRegistry[tenant.theme]()
+  const Home = ThemeModule.Home
+  return <Home tenant={tenant} />
+}
+
+# ================================================================================================
+# ================================================================================================
+
+// themes/registry.ts
+export const themeRegistry: Record<string, () => Promise<any>> = {
+  marketplace: () => import('./marketplace'),
+}
+
+#? ===== new themes register =====
+
+// export const themeRegistry: Record<string, () => Promise<any>> = {
+//   marketplace: () => import('./marketplace'),
+//   grocery: () => import('./grocery'),
+// }
+
+# ================================================================================================
+# ================================================================================================
+
+# .env.local (It's not work, but add it in your file)
+BACKEND_URL=http://localhost:8000
+
+# ================================================================================================
+# ================================================================================================
+
+url check: 
+1. http://localhost:3000/
+2. http://shop1.localhost:3000/
+
+Today Task:
+├── themes/
+│   ├── grocery/                  # (খালি ফোল্ডার)
+new url create and check:
+3. http://shop2.localhost:3000/ (title name: Grocery Store)

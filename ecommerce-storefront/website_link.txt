@@ -1,0 +1,4 @@
+1. default -> http://localhost:3000/
+2. marketplace -> http://shop1.localhost:3000/
+3. grocery -> http://grocery.localhost:3000/
+

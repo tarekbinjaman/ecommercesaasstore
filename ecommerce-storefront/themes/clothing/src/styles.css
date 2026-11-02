@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+  background-color: #F6F9F7;
+  font-family: 'Hind Siliguri', sans-serif;
+}
+
+@keyframes scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+}

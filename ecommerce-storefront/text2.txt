@@ -1,0 +1,710 @@
+Tree 2: store desigin (next.js):
+
+frontendecommercesaasstoredesign/
+│
+├── package.json                          ← root workspace (pnpm)
+├── pnpm-workspace.yaml                   ← workspace packages define
+├── .gitignore
+├── README.md
+│
+├── .github/
+│   └── workflows/
+│       ├── deploy-storefront.yml         ← path: storefront/**
+│       ├── deploy-marketplace.yml        ← path: marketplace/**
+│       ├── deploy-grocery.yml            ← path: grocery/**
+│       ├── deploy-fashion.yml            ← path: fashion/**
+│       ├── deploy-warehouse.yml          ← path: warehouse/**
+│       ├── deploy-electronics.yml        ← path: electronics/**
+│       ├── deploy-kids.yml               ← path: kids/**
+│       ├── deploy-sports.yml             ← path: sports/**
+│       ├── deploy-books.yml              ← path: books/**
+│       ├── publish-contracts.yml         ← path: _contracts/**
+│       └── deploy-vendor-custom.yml      ← path: vendor-custom/**
+│
+├── storefront/                           ← Next.js app (customer-facing)
+│   │
+│   ├── package.json
+│   ├── next.config.js
+│   ├── tsconfig.json
+│   ├── tailwind.config.ts
+│   ├── postcss.config.js
+│   ├── .env.local                        ← NEXT_PUBLIC_API_URL, CDN URL
+│   ├── .env.example
+│   │
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   ├── robots.txt
+│   │   └── images/
+│   │
+│   └── src/
+│       ├── app/
+│       │   ├── layout.tsx                ← Root + StoreProvider + ThemeProvider
+│       │   ├── page.tsx                  ← Home (design-driven)
+│       │   ├── globals.css
+│       │   ├── not-found.tsx
+│       │   ├── error.tsx
+│       │   ├── loading.tsx
+│       │   │
+│       │   ├── (storefront)/
+│       │   │   ├── layout.tsx            ← DesignHost + shell
+│       │   │   ├── products/
+│       │   │   │   ├── page.tsx          ← ISR 300s
+│       │   │   │   └── [slug]/page.tsx   ← ISR 3600s
+│       │   │   ├── categories/
+│       │   │   │   ├── page.tsx
+│       │   │   │   └── [slug]/page.tsx
+│       │   │   ├── search/page.tsx       ← Meilisearch
+│       │   │   ├── cart/page.tsx
+│       │   │   ├── checkout/
+│       │   │   │   ├── page.tsx
+│       │   │   │   ├── shipping/page.tsx
+│       │   │   │   ├── payment/page.tsx
+│       │   │   │   └── success/page.tsx
+│       │   │   ├── about/page.tsx
+│       │   │   └── [...pages]/page.tsx   ← CMS pages
+│       │   │
+│       │   ├── (auth)/
+│       │   │   ├── layout.tsx
+│       │   │   ├── login/page.tsx
+│       │   │   ├── register/page.tsx
+│       │   │   └── forgot-password/page.tsx
+│       │   │
+│       │   ├── (account)/
+│       │   │   ├── layout.tsx            ← sidebar + auth guard
+│       │   │   └── account/
+│       │   │       ├── page.tsx
+│       │   │       ├── orders/
+│       │   │       │   ├── page.tsx
+│       │   │       │   └── [id]/page.tsx
+│       │   │       ├── addresses/page.tsx
+│       │   │       ├── wishlist/page.tsx
+│       │   │       ├── profile/page.tsx
+│       │   │       └── loyalty/page.tsx
+│       │   │
+│       │   └── api/
+│       │       ├── proxy/[...path]/route.ts    ← backend proxy
+│       │       ├── revalidate/route.ts         ← ISR webhook
+│       │       └── og/route.tsx                ← OG image generation
+│       │
+│       ├── components/
+│       │   ├── shell/                    ← storefront shell (design-agnostic)
+│       │   │   ├── DesignHost.tsx        ← design load + render
+│       │   │   ├── DesignSlot.tsx        ← design injection point
+│       │   │   └── DesignFallback.tsx    ← loading state for design
+│       │   │
+│       │   ├── providers/
+│       │   │   ├── StoreProvider.tsx     ← RTK ("use client")
+│       │   │   └── ThemeProvider.tsx     ← CSS vars inject
+│       │   │
+│       │   └── ui/                       ← shell UI only (loading/error)
+│       │       ├── Spinner.tsx
+│       │       ├── Skeleton.tsx
+│       │       ├── ErrorBoundary.tsx
+│       │       └── NotFound.tsx
+│       │
+│       ├── store/                        ← Redux Toolkit
+│       │   ├── index.ts                  ← makeStore
+│       │   ├── hooks.ts                  ← typed hooks
+│       │   │
+│       │   ├── slices/                   ← client state
+│       │   │   ├── authSlice.ts          ← customer session
+│       │   │   ├── cartSlice.ts          ← add/remove/qty
+│       │   │   ├── wishlistSlice.ts
+│       │   │   ├── tenantSlice.ts        ← current store + design
+│       │   │   ├── checkoutSlice.ts      ← multi-step state
+│       │   │   └── uiSlice.ts            ← drawer, modal, search
+│       │   │
+│       │   └── api/                      ← RTK Query (server state)
+│       │       ├── baseApi.ts
+│       │       ├── productsApi.ts
+│       │       ├── categoriesApi.ts
+│       │       ├── ordersApi.ts
+│       │       ├── authApi.ts
+│       │       ├── cartSyncApi.ts        ← optional server cart
+│       │       └── tenantApi.ts
+│       │
+│       ├── lib/
+│       │   ├── api.ts                    ← axios (fallback)
+│       │   ├── auth.ts                   ← httpOnly cookie helpers
+│       │   ├── tenant.ts                 ← edge-compatible resolver
+│       │   ├── design-loader.ts          ← ⭐ CDN থেকে design load
+│       │   ├── theme-provider.tsx        ← CSS vars
+│       │   ├── seo.ts                    ← metadata builders
+│       │   ├── analytics.ts              ← GA4 / Plausible
+│       │   ├── constants.ts
+│       │   └── utils.ts
+│       │
+│       ├── hooks/
+│       │   ├── useTenant.ts
+│       │   ├── useDesign.ts
+│       │   ├── useCart.ts
+│       │   ├── useDebounce.ts
+│       │   └── useMediaQuery.ts
+│       │
+│       ├── types/
+│       │   ├── product.ts
+│       │   ├── cart.ts
+│       │   ├── order.ts
+│       │   ├── customer.ts
+│       │   ├── tenant.ts
+│       │   ├── design.ts
+│       │   └── api.ts
+│       │
+│       └── middleware.ts                 ← subdomain + auth + A/B
+│
+├── _contracts/                           ← shared TS interface
+│   ├── package.json                      ← "@yourorg/designs-contracts"
+│   ├── tsconfig.json
+│   ├── rollup.config.js
+│   ├── .npmignore
+│   └── src/
+│       ├── index.ts                      ← main export
+│       ├── design-package.ts             ← DesignPackage interface
+│       ├── props.ts                      ← HomeProps, ProductProps, ...
+│       ├── data.ts                       ← Product, Cart, Tenant types
+│       └── config-schema.ts              ← base zod schema
+│
+├── marketplace/                          ← Design 1 (Daraz-like)
+│   ├── package.json                      ← "@yourorg/design-marketplace"
+│   ├── design.config.ts                  ← metadata
+│   ├── config-schema.ts                  ← marketplace config (zod)
+│   ├── tailwind.config.ts                ← ⭐ নিজের (orange/yellow)
+│   ├── postcss.config.js
+│   ├── rollup.config.js
+│   ├── tsconfig.json
+│   ├── .env                              ← CDN_URL
+│   │
+│   ├── src/
+│   │   ├── index.tsx                     ← export default DesignPackage
+│   │   ├── styles.css                    ← @tailwind directives
+│   │   ├── Layout.tsx
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── ProductPage.tsx
+│   │   │   ├── CategoryPage.tsx
+│   │   │   ├── SearchPage.tsx
+│   │   │   ├── CartPage.tsx
+│   │   │   ├── CheckoutPage.tsx
+│   │   │   └── AccountPage.tsx
+│   │   │
+│   │   ├── sections/
+│   │   │   ├── HeroBanner.tsx
+│   │   │   ├── FlashSale.tsx
+│   │   │   ├── CategoryGrid.tsx
+│   │   │   ├── ProductGrid.tsx
+│   │   │   └── PromoBanner.tsx
+│   │   │
+│   │   └── components/                   ← ⭐ marketplace-এর নিজের সব
+│   │       ├── Button.tsx
+│   │       ├── Input.tsx
+│   │       ├── Select.tsx
+│   │       ├── Modal.tsx
+│   │       ├── Drawer.tsx
+│   │       ├── Header.tsx
+│   │       ├── Footer.tsx
+│   │       ├── Sidebar.tsx
+│   │       ├── ProductCard.tsx
+│   │       ├── CategoryPill.tsx
+│   │       ├── CartDrawer.tsx
+│   │       ├── SearchBar.tsx
+│   │       ├── FilterPanel.tsx
+│   │       └── Badge.tsx
+│   │
+│   └── dist/                             ← build → CDN
+│       ├── index.js
+│       ├── styles.css
+│       └── manifest.json
+│
+├── grocery/                              ← Design 2 (Ghorer Bazar-like)
+│   ├── package.json
+│   ├── design.config.ts
+│   ├── config-schema.ts
+│   ├── tailwind.config.ts                ← ⭐ green/fresh
+│   ├── rollup.config.js
+│   ├── src/
+│   │   ├── index.tsx
+│   │   ├── styles.css
+│   │   ├── Layout.tsx
+│   │   ├── pages/
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── ProductPage.tsx
+│   │   │   ├── CategoryPage.tsx
+│   │   │   ├── CartPage.tsx
+│   │   │   └── CheckoutPage.tsx
+│   │   ├── sections/
+│   │   │   ├── SplitHero.tsx
+│   │   │   ├── CategoryCarousel.tsx
+│   │   │   └── TopSelling.tsx
+│   │   └── components/                   ← grocery-এর নিজের
+│   │       ├── Button.tsx
+│   │       ├── Header.tsx
+│   │       ├── Footer.tsx
+│   │       ├── ProductCard.tsx
+│   │       └── ...
+│   └── dist/
+│
+├── fashion/                              ← Design 3 (Zara-like)
+│   ├── tailwind.config.ts                ← ⭐ black/sharp/serif
+│   └── src/
+│       └── components/                   ← fashion-এর নিজের সব
+│
+├── warehouse/                            ← Design 4 (Amazon-like)
+│   ├── tailwind.config.ts                ← ⭐ blue/dense
+│   └── src/
+│       └── components/
+│
+├── electronics/                          ← Design 5 (BestBuy-like)
+│   ├── tailwind.config.ts                ← ⭐ dark/tech
+│   └── src/
+│
+├── kids/                                 ← Design 6 (Disney-like)
+│   ├── tailwind.config.ts                ← ⭐ colorful/rounded
+│   └── src/
+│
+├── sports/                               ← Design 7 (Nike-like)
+│   ├── tailwind.config.ts                ← ⭐ bold/energetic
+│   └── src/
+│
+├── books/                                ← Design 8 (Barnes&Noble-like)
+│   ├── tailwind.config.ts                ← ⭐ warm/classic
+│   └── src/
+│
+├── vendor-custom/                        ← Enterprise forks
+│   ├── kaporbazar/                       ← fork of marketplace
+│   │   ├── package.json
+│   │   ├── design.config.ts              ← basedOn: "marketplace"
+│   │   ├── tailwind.config.ts            ← নিজের colors
+│   │   ├── config-schema.ts
+│   │   ├── rollup.config.js
+│   │   ├── src/
+│   │   │   ├── index.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   ├── pages/
+│   │   │   ├── sections/                 ← custom homepage sections
+│   │   │   └── components/               ← custom Header, Footer
+│   │   └── dist/
+│   │
+│   ├── luxury-wear/                      ← fork of fashion
+│   │   └── ...
+│   └── tech-zone/                        ← fork of electronics
+│       └── ...
+│
+└── scripts/
+    ├── create-design.sh                  ← new default design scaffold
+    ├── create-fork.sh                    ← vendor custom fork
+    ├── build-design.sh                   ← build single design
+    └── deploy-design.sh                  ← build + CDN upload
+
+#? frontendecommercesaasstoredesign/package.json
+{
+  "name": "store-design",
+  "private": true,
+  "scripts": {
+    "build:storefront": "pnpm --filter saas-storefront build",
+    "build:marketplace": "pnpm --filter @yourorg/design-marketplace build",
+    "build:grocery": "pnpm --filter @yourorg/design-grocery build",
+    "build:all-designs": "pnpm --filter './marketplace' --filter './grocery' --filter './fashion' build",
+    "deploy:storefront": "pnpm --filter saas-storefront deploy",
+    "deploy:marketplace": "pnpm --filter @yourorg/design-marketplace deploy"
+  }
+}
+
+#! Store-Design System Rules:
+
+Repo Name:
+    ecommercesaasstore/                     ← সম্পূর্ণ আলাদা Git repo
+
+Purpose:
+    Customer-facing storefront + সব design packages
+    (Dashboard repo-র সাথে কোনো coupling নেই)
+
+────────────────────────────────────────────────────────────
+Stack:
+────────────────────────────────────────────────────────────
+
+Storefront (Next.js app):
+    Next.js 14+ (App Router)
+    TypeScript
+    Redux Toolkit + RTK Query
+    redux-persist (cart persist)
+    TailwindCSS (shell only — loading/error UI)
+    Zod (validation)
+    React Hook Form
+
+Designs (isolated packages):
+    React 18 (peer dependency)
+    TypeScript
+    Rollup (build → single bundle)
+    TailwindCSS (প্রতিটা design-এর নিজের config)
+    Zod (config schema)
+    clsx + tailwind-merge
+
+Contracts (npm package):
+    TypeScript only (কোনো runtime code না)
+    Rollup (build → ESM + CJS + types)
+
+Workspace:
+    pnpm workspaces
+    প্রতিটা design আলাদা package
+
+────────────────────────────────────────────────────────────
+Structure Rules:
+────────────────────────────────────────────────────────────
+
+storefront/          ← Next.js shell (customer-facing)
+_contracts/          ← shared TS interface (npm publish)
+marketplace/         ← Design 1 (self-contained)
+grocery/             ← Design 2 (self-contained)
+fashion/             ← Design 3 (self-contained)
+warehouse/           ← Design 4 (self-contained)
+electronics/         ← Design 5 (self-contained)
+kids/                ← Design 6 (self-contained)
+sports/              ← Design 7 (self-contained)
+books/               ← Design 8 (self-contained)
+vendor-custom/       ← Enterprise forks (N = 50-100)
+    kaporbazar/      ← fork of marketplace
+    luxury-wear/     ← fork of fashion
+    tech-zone/       ← fork of electronics
+scripts/             ← automation scripts
+
+────────────────────────────────────────────────────────────
+Critical Rules (Never Break):
+────────────────────────────────────────────────────────────
+
+1. Design = সম্পূর্ণ Self-Contained
+   ❌ কোনো design অন্য design-এর component import করবে না
+   ✅ প্রতিটা design-এর নিজের Button, Header, Footer, Sidebar
+   ✅ প্রতিটা design-এর নিজের tailwind.config.ts
+   ✅ প্রতিটা design-এর নিজের styles.css
+
+2. Storefront = Dumb Shell
+   ❌ Storefront-এ কোনো visual component থাকবে না
+   ✅ Storefront শুধু tenant resolve + data fetch + design load
+   ✅ Storefront-এ শুধু loading/error UI থাকবে
+
+3. Contract-only Sharing
+   ✅ শুধু _contracts/ (TypeScript interface) share হবে
+   ❌ কোনো UI component share হবে না
+   ❌ কোনো CSS share হবে না
+
+4. Version Pinning
+   ✅ CDN URL: cdn.myapp.com/designs/{slug}@{version}/index.js
+   ✅ Tenant-এ designVersion save থাকবে (e.g., "1.2.3")
+   ❌ "latest" URL use করবে না
+
+5. Tailwind Isolation
+   ✅ প্রতিটা design-এর আলাদা compiled CSS
+   ✅ Optional: prefix (mp-, gr-, fsh-) collision avoid
+   ❌ Global Tailwind class design-এর বাইরে use করবে না
+
+────────────────────────────────────────────────────────────
+Storefront Rules:
+────────────────────────────────────────────────────────────
+
+middleware.ts:
+    - Subdomain → tenant slug resolve
+    - Auth guard for /account/*
+    - A/B test header inject (optional)
+    - Edge-compatible (Node API use করবে না)
+
+lib/tenant.ts:
+    - Edge-compatible (no fs, no Node APIs)
+    - Redis cache (5 min TTL)
+    - Fallback to API if cache miss
+
+lib/design-loader.ts:
+    - CDN থেকে dynamic import
+    - CSS inject <head>-এ (once)
+    - Version pinned URL
+    - Cached at edge
+
+lib/api.ts:
+    - axios instance (fallback)
+    - interceptor: tenant header + auth cookie
+
+store/:
+    - RTK + RTK Query
+    - slices: auth, cart, tenant, wishlist, checkout, ui
+    - RTK Query: products, categories, orders, auth, tenant
+    - Cart slice redux-persist এ save হবে
+
+middleware vs api routes:
+    - middleware = edge runtime (auth check, subdomain)
+    - app/api/* = serverless (proxy, revalidate, OG)
+
+ISR Strategy:
+    - Product page: revalidate 3600 (1 hour)
+    - Category page: revalidate 300 (5 min)
+    - Home page: revalidate 60 (1 min)
+    - Static pages: full static
+
+────────────────────────────────────────────────────────────
+Design Package Rules:
+────────────────────────────────────────────────────────────
+
+প্রতিটা design folder-এ থাকবে:
+    package.json          ← name: "@yourorg/design-{slug}"
+    design.config.ts      ← metadata (id, version, thumbnail, category)
+    config-schema.ts      ← zod schema (vendor config validation)
+    tailwind.config.ts    ← ⭐ নিজের (আলাদা color, radius, font)
+    postcss.config.js
+    rollup.config.js      ← build → dist/index.js + dist/styles.css
+    tsconfig.json
+    .env                  ← CDN_URL
+    src/
+        index.tsx         ← export default DesignPackage
+        styles.css        ← @tailwind directives
+        Layout.tsx
+        pages/            ← HomePage, ProductPage, CartPage, ...
+        sections/         ← Hero, FlashSale, ProductGrid, ...
+        components/       ← Button, Header, Footer, Sidebar (সব নিজের)
+    dist/                 ← build output (gitignored)
+
+DesignPackage Interface:
+    - id: string
+    - version: string
+    - configSchema: ZodSchema
+    - Layout: Component
+    - HomePage: Component
+    - ProductPage: Component
+    - CategoryPage: Component
+    - SearchPage: Component
+    - CartPage: Component
+    - CheckoutPage: Component
+    - AccountPage: Component
+
+────────────────────────────────────────────────────────────
+Vendor Custom Fork Rules:
+────────────────────────────────────────────────────────────
+
+Kokhon fork করব:
+    - Vendor Enterprise plan-এ upgrade করলে
+    - Vendor "custom homepage/sections" request করলে
+    - Platform admin approve করলে (serial priority)
+    - Base design দিয়ে কাজ না হলে
+
+Kokhon fork করব না:
+    - শুধু color/logo/banner change → config use করবে
+    - শুধু text/image change → config use করবে
+    - 95% vendors default + config-এ চলবে
+
+Fork structure:
+    vendor-custom/{vendor-slug}/
+        design.config.ts      ← basedOn: "marketplace"
+        package.json          ← "@yourorg/design-{vendor-slug}"
+        src/
+            index.tsx
+            Layout.tsx
+            pages/            ← custom pages
+            sections/         ← custom sections
+            components/       ← custom Header, Footer
+        dist/
+
+Fork rules:
+    - basedOn metadata রাখবে (base design track)
+    - শুধু custom অংশ লিখবে (অন্যসব base থেকে copy)
+    - আলাদা CDN bundle ({vendor-slug}@{version})
+    - Serial priority system
+    - Max 50-100 forks (5% of 5000 vendors)
+
+────────────────────────────────────────────────────────────
+Scripts:
+────────────────────────────────────────────────────────────
+
+scripts/create-design.sh {name}
+    - designs/_base থেকে scaffold
+    - package.json + config-schema + tailwind setup
+
+scripts/create-fork.sh {base} {vendor}
+    - designs/{base}/ থেকে copy
+    - design.config.ts এ basedOn update
+    - vendor-custom/{vendor}/ তৈরি
+
+scripts/build-design.sh {slug}
+    - নির্দিষ্ট design build
+
+scripts/deploy-design.sh {slug} {version}
+    - build + CDN upload
+    - CDN URL: cdn.myapp.com/designs/{slug}@{version}/
+
+────────────────────────────────────────────────────────────
+Build & Deploy Rules:
+────────────────────────────────────────────────────────────
+
+Independent Build:
+    ❌ পুরো repo build করব না
+    ✅ শুধু specific package build করব
+
+Commands:
+    pnpm --filter saas-storefront build
+    pnpm --filter @yourorg/design-marketplace build
+    pnpm --filter @yourorg/design-grocery build
+    pnpm --filter @yourorg/designs-contracts build
+
+Root scripts (convenience):
+    pnpm build:storefront
+    pnpm build:marketplace
+    pnpm build:grocery
+    pnpm build:all-designs
+
+GitHub Actions (path-based):
+    deploy-storefront.yml     ← paths: storefront/**
+    deploy-marketplace.yml    ← paths: marketplace/**
+    deploy-grocery.yml        ← paths: grocery/**
+    deploy-fashion.yml        ← paths: fashion/**
+    ...
+    publish-contracts.yml     ← paths: _contracts/**
+    deploy-vendor-custom.yml  ← paths: vendor-custom/**
+
+Deploy Targets:
+    storefront      → Vercel
+    _contracts      → npm registry
+    designs         → CDN (S3/R2 + Cloudflare)
+
+────────────────────────────────────────────────────────────
+Update Workflow:
+────────────────────────────────────────────────────────────
+
+Scenario 1: Storefront update
+    cd storefront/
+    pnpm build && pnpm deploy
+    → শুধু storefront deploy
+
+Scenario 2: Marketplace design update
+    cd marketplace/
+    pnpm build && pnpm deploy
+    → CDN-এ marketplace@1.2.4
+
+Scenario 3: _contracts update
+    cd _contracts/
+    pnpm build && pnpm publish
+    → npm-এ publish
+    → dependency version bump
+    → related designs rebuild
+
+Scenario 4: New default design
+    ./scripts/create-design.sh newdesign
+    → designs/newdesign/ scaffold
+    → build + deploy
+
+Scenario 5: Vendor custom fork
+    ./scripts/create-fork.sh marketplace kaporbazar
+    → vendor-custom/kaporbazar/ scaffold
+    → custom edit
+    → build + deploy CDN
+
+────────────────────────────────────────────────────────────
+Start Order (Developer):
+────────────────────────────────────────────────────────────
+
+PHASE 1: Storefront Skeleton
+    1. pnpm workspace setup (root)
+    2. Next.js 14 + TS + Tailwind (storefront/)
+    3. middleware.ts (subdomain + auth)
+    4. lib/tenant.ts (edge-compatible)
+    5. lib/api.ts + auth.ts
+    6. store/ setup (RTK + baseApi)
+    7. StoreProvider + ThemeProvider
+    8. App shell (layout, error, loading)
+
+PHASE 2: Storefront Pages
+    9. (storefront) routes skeleton
+    10. (auth) routes
+    11. (account) routes
+    12. API proxy route
+    13. ISR setup (revalidate webhook)
+    14. SEO (metadata, sitemap, robots)
+
+PHASE 3: Contracts + Marketplace Design
+    15. _contracts/ package
+    16. npm publish (@yourorg/designs-contracts)
+    17. marketplace/ scaffold
+    18. tailwind.config.ts (orange/yellow)
+    19. Layout.tsx (Header + Footer + Sidebar)
+    20. components/ (Button, Card, Input — নিজের)
+    21. sections/ (Hero, FlashSale, ProductGrid)
+    22. pages/ (HomePage, ProductPage, CartPage, Checkout)
+    23. rollup.config.js (bundle build)
+    24. config-schema.ts (zod)
+    25. dist/ + CDN upload
+
+PHASE 4: Design Loader Integration
+    26. lib/design-loader.ts (CDN + version pin)
+    27. components/shell/DesignHost.tsx
+    28. ThemeProvider (CSS vars inject)
+    29. Wire Storefront ↔ Marketplace
+    30. End-to-end test
+
+PHASE 5: Remaining 7 Designs
+    31. grocery/
+    32. fashion/
+    33. warehouse/
+    34. electronics/
+    35. kids/
+    36. sports/
+    37. books/
+
+PHASE 6: Enterprise Forks
+    38. scripts/create-fork.sh
+    39. vendor-custom/kaporbazar/
+    40. vendor-custom/luxury-wear/
+    41. Fork request workflow
+
+────────────────────────────────────────────────────────────
+Scale Notes (5000 vendors × 5Cr customers):
+────────────────────────────────────────────────────────────
+
+Designs:
+    8 default + 50-100 custom forks
+    95% vendors config-driven, 5% custom
+
+Storefront:
+    ISR everywhere (product 1h, category 5m, home 1m)
+    Edge middleware for subdomain routing
+    CDN cache for design bundles (edge)
+    Image CDN (Cloudflare R2 + next/image)
+
+Performance:
+    Bundle < 200KB first load
+    Lighthouse > 90
+    TTFB < 200ms (edge)
+    Design bundle lazy loaded
+
+Database:
+    Tenant table-এ design + designVersion + config (JSONB)
+    Platform admin bulk-update design version
+
+CDN:
+    Design bundles: cdn.myapp.com/designs/{slug}@{version}/
+    Image assets: cdn.myapp.com/{tenant-id}/images/
+    Edge cache TTL: 1 hour (design), 24 hours (images)
+
+────────────────────────────────────────────────────────────
+Forbidden (Never Do):
+────────────────────────────────────────────────────────────
+
+❌ Shared UI component design-এর বাইরে
+❌ Global Tailwind CSS design-এর বাইরে
+❌ Storefront-এ visual component
+❌ Design version pin ছাড়া CDN load
+❌ পুরো repo একসাথে build
+❌ "latest" tag দিয়ে design deploy
+❌ প্রতি vendor-এর জন্য fork
+❌ Cross-design component import
+❌ Storefront ↔ Design coupling (except contract)
+
+────────────────────────────────────────────────────────────
+Required (Always Do):
+────────────────────────────────────────────────────────────
+
+✅ প্রতিটা design আলাদা package
+✅ প্রতিটা design self-contained
+✅ CDN version pinning
+✅ Path-based GitHub Actions
+✅ ISR for storefront pages
+✅ Tenant resolver edge-compatible
+✅ Contract-only sharing
+✅ Tailwind isolation per design
+✅ Independent build/deploy
+✅ Design + config separation
